@@ -1,27 +1,28 @@
-# --- Build stage ---
-FROM golang:1.22-alpine AS builder
-WORKDIR /src
+# syntax=docker/dockerfile:1.6
 
-# 1) Модуль
-COPY go.mod ./
+# --- Build stage (multi-arch aware) ---
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS build
+WORKDIR /work
 
-# 2) Код (после этого tidy соберёт go.sum по реальным импортам)
-COPY src ./src
+# Кэш модулей
+COPY go.mod ./ 
+RUN go mod download
 
-# 3) Сгенерировать go.sum и подтянуть зависимости
-#   (tidy пройдётся по ./src, добавит нужные зависимости в go.mod/go.sum)
-RUN go mod tidy
+# Исходники (у тебя код лежит в ./src)
+COPY . .
 
-# 4) Собрать бинарь
-WORKDIR /src/src
-ENV CGO_ENABLED=0 GOOS=linux
-RUN go build -trimpath -ldflags "-s -w" -o /out/events
+# Кросс-компиляция под целевую платформу от buildx
+ARG TARGETOS TARGETARCH
+ENV CGO_ENABLED=0
+# Если main.go в ./src — оставляем так; поменяй путь при необходимости
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/proxy ./src
 
-# --- Runtime stage ---
+# --- Runtime stage (multi-arch) ---
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
-COPY --from=builder /out/events /app/events
-ENV PORT=8082
-EXPOSE 8082
+COPY --from=build /out/proxy /app/proxy
+ENV PORT=8000
+EXPOSE 8000
 USER nonroot:nonroot
-ENTRYPOINT ["/app/events"]
+ENTRYPOINT ["/app/proxy"]

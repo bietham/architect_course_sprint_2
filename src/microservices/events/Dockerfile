@@ -1,22 +1,28 @@
-# --- Build stage ---
-FROM golang:1.22-alpine AS builder
-WORKDIR /src
+# syntax=docker/dockerfile:1.6
 
-COPY go.mod ./
+# --- Build stage ---
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS build
+WORKDIR /work
+
+# 1) Модуль 
+COPY go.mod ./ 
+# 2) Код (после этого tidy соберёт go.sum по реальным импортам) 
 COPY src ./src
 
-# важное: формируем go.sum по фактическим импортам (в т.ч. kafka-go)
-RUN apk add --no-cache git && \
-    cd /src && go mod tidy
+RUN go mod tidy
 
-WORKDIR /src/src
-ENV CGO_ENABLED=0 GOOS=linux
-RUN go build -trimpath -ldflags "-s -w" -o /out/events
+# кросс-параметры от buildx
+ARG TARGETOS TARGETARCH
+ENV CGO_ENABLED=0
+
+# Если main.go лежит в ./src — оставляем так. Если другой путь — подставь его.
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags "-s -w" -o /out/events ./src
 
 # --- Runtime stage ---
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /app
-COPY --from=builder /out/events /app/events
+COPY --from=build /out/events /app/events
 ENV PORT=8082
 EXPOSE 8082
 USER nonroot:nonroot
