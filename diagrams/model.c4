@@ -1,0 +1,94 @@
+model {
+
+    //Клиентская сторона
+    client client
+    client-apps client-apps {
+        mobile-app mobile-app
+        web-app web-app
+        other-app other-app
+    }
+    client -> client-apps 'Использует клиентское приложение'
+    client-apps -[https]-> api-gateway 'Вызывает методы' 
+
+    cluster cluster {
+        api-gateway api-gateway
+        profile-service profile-service
+        movie-service movie-service
+        subscription-service subscription-service
+        payment-service payment-service
+        kafka kafka
+        pgsql-haproxy pgsql-haproxy
+
+        //Маршрутизация
+
+        api-gateway -[https]-> profile-service 'Профиль, аутентефикации'
+        api-gateway -[https]-> movie-service 'Фильмы, оценки, подборки'
+        api-gateway -[https]-> subscription-service 'Подписка'
+        api-gateway -[https]-> payment-service 'Оплаты'
+
+
+        //Обращение к кафке
+
+        profile-service -[https]-> kafka 'События пользователей (регистрация, вход)'
+        movie-service -[https]-> kafka 'События фильмов (просмотр, оценка, добавление)'
+        payment-service -[https]-> kafka 'Передача событий платежей (успешные, неудачные)'
+        
+        
+        kafka -> subscription-service 'Чтение событий оплаты'
+        kafka -> profile-service 'Чтение событий фильмов для отправки в рекомендательную систему'
+
+
+        //Внешние сервисы
+
+        payment-service -[https]-> billing 'Обработка платежей'
+        movie-service -[https]-> online-cinema 'Запрос метаданных фильмов, данные доступа в s3'
+        movie-service -[https]-> s3 'Чтение файлов фильмов'
+        profile-service -[amqp]-> rabbitMQ 'Передает собыия пользователя'
+
+        rabbitMQ -[amqp]-> recomendation-service 'Читает события пользователя'
+        recomendation-service -[amqp]-> rabbitMQ 'Обновляет подборку пользователя'
+
+        rabbitMQ -[amqp]-> profile-service 'Сохраняет новую подборку пользователя'
+
+        
+
+        //Обращение к бд
+
+        profile-service -[https]-> pgsql-haproxy 'Данные профиля, аутентефикаци, рекомендации'
+        movie-service -[https]-> pgsql-haproxy 'Метаданные фильмов, рейтинги, жанры'
+        payment-service -[https]-> pgsql-haproxy 'Данные платежей'
+        subscription-service -[https]-> pgsql-haproxy 'Подписки, скидки'
+
+        pgsql-haproxy -[pgsql]-> database 'Маршрутизация в хранилище'
+    }
+
+    pg-server pg-server {
+        database database
+    }
+    external external {
+        rabbitMQ rabbitMQ
+        recomendation-service recomendation-service
+        billing billing
+        online-cinema online-cinema
+        s3 s3
+    }
+
+    
+
+
+
+
+
+}
+
+views {
+    
+    view index {
+        title 'Диаграмма контейнеров'
+        include *,
+            client-apps.*,
+            cluster.*,
+            external.*,
+            pg-server.*
+    }
+}

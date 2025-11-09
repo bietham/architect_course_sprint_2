@@ -2,7 +2,24 @@
 
 -- Create database if it doesn't exist
 -- Note: This is handled by Docker Compose and Kubernetes configs
+DO
+$$
+BEGIN
+   IF NOT EXISTS (
+      SELECT FROM pg_catalog.pg_roles WHERE rolname = 'postgres'
+   ) THEN
+      CREATE ROLE postgres WITH LOGIN PASSWORD 'postgres_password';
+   END IF;
+END
+$$;
 
+
+-- Create the database if it doesn't exist
+CREATE DATABASE cinemaabyss;
+
+-- Grant privileges
+
+GRANT ALL PRIVILEGES ON DATABASE cinemaabyss TO postgres;
 -- Connect to the database
 \c cinemaabyss;
 

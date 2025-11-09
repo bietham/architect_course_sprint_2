@@ -69,7 +69,7 @@ func main() {
 func initDB() {
 	connStr := os.Getenv("DB_CONNECTION_STRING")
 	if connStr == "" {
-		connStr = "postgres://postgres:postgres@localhost/cinemaabyss?sslmode=disable"
+		connStr = "postgres://postgres:postgres_password@localhost/cinemaabyss?sslmode=disable"
 	}
 	var err error
 	db, err = sql.Open("postgres", connStr)

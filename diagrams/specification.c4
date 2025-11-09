@@ -1,0 +1,235 @@
+specification {
+
+
+    element cluster {
+        title 'Kubernetes cluster'
+        technology 'kunernetes'
+        notation 'system'
+        style {
+            shape rectangle
+            color primary
+        }
+    }
+
+    //Контейнеры
+    element container {
+        style {
+            shape rectangle
+            color primary
+        }
+    }
+    element api-gateway {
+        title 'API Gateway'
+        summary 'Фасад, маршрутизация запросов'
+        technology 'Go'
+        notation 'Container'
+        style {
+            shape rectangle
+            color primary
+        }
+    }
+    element profile-service {
+        title 'profile-service'
+        summary 'Сервис профиля, аутентефикация, авторизация'
+        technology 'Go'
+        notation 'Container'
+        style {
+            shape rectangle
+            color primary
+        }
+    }
+    
+    element payment-service {
+        title 'payment-service'
+        summary 'Обрабатывает платежи'
+        technology 'Go'
+        notation 'Container'
+        style {
+            color primary
+            shape rectangle
+        }
+    }
+    element subscription-service {
+        title 'subscription-service'
+        summary 'Обрабатывает всю функциональность связаную с управлением подписками' 
+        technology 'Go'
+        notation 'Container'
+        style {
+            color primary
+            shape rectangle
+        }
+    }
+    element movie-service {
+        title 'movie-service'
+        summary 'Обрабтывает всю функциональность, связанную с фильмами'
+        technology 'Go'
+        notation 'Container'
+        style {
+            color primary
+            shape rectangle
+        }
+    }
+    element kafka {
+        title 'Kafka'
+        summary 'Внутренний брокер сообщений для событий'
+        technology 'kafka'
+        notation 'Container'
+        style {
+            color primary
+            shape queue
+        }
+    }
+
+    //Хранилище 
+
+    element pgsql-haproxy {
+        title "Postgresql Proxy"
+        technology 'haProxy'
+        notation 'Container'
+        summary 'Маршрутизирует запросы на хранилище postgres'
+        style {
+            color secondary
+            shape rectangle
+        }
+    }
+    element pg-server {
+        title 'Postgresql server'
+        summary 'Сервер с pgsql хранилищем'
+        notation 'System'
+        style {
+            color primary
+            shape rectangle
+        }
+    }
+    element database {
+        title 'База данных'
+        summary 'Хранилище postgresql'
+        technology 'PostgresSQL'
+        notation 'Container'
+        style {
+            color primary
+            shape storage
+        }
+    }
+    element s3 {
+        title 'S3 Хранилище'
+        summary 'Хранилище для файлов'
+        technology 'S3'
+        notation 'Container'
+        style {
+            color muted
+            shape storage
+        }
+    }
+
+    // Внешние сервисы
+    element external {
+        title 'Внешняя система'
+        notation 'System'
+        style {
+            color muted
+        }
+    }
+
+    element billing {
+        title 'Внешний сервис платежей'
+        summary 'Обрабатывает платежи на стороне банкинга'
+        notation 'Container'
+        style {
+             color muted
+             shape rectangle
+        }
+    }
+    element rabbitMQ {
+        title 'RabbitMQ'
+        summary 'Брокер сообщений сервиса рекомендаций'
+        technology 'RabbitMQ'
+        notation 'Container'
+        style {
+            color muted
+            shape queue
+        }
+    }
+    element recomendation-service {
+        title 'recomendation-service'
+        summary 'Внешний сервис рекомендаций' 
+        notation 'Container'
+        style {
+             color muted
+             shape rectangle 
+        }
+    }
+    element online-cinema {
+        title 'Онлайн-кинотеатры'
+        summary 'Внешние провайдеры онлайн-кинотеатра'
+        notation 'Container'
+        style {
+            color muted
+            shape rectangle
+        }
+    }
+
+    // Клиентские приложения
+    element client {
+        title 'Клиент'
+        style {
+             color primary
+             shape person
+        }
+    }
+    element client-apps {
+        title 'Клиентские приложения'
+        notation 'System'
+        style {
+            shape rectangle
+            color primary
+        }
+    }
+    element mobile-app {
+        title 'Мобильное приложение'
+        summary 'Пользовательское приложение на мобильных устройствах'
+        notation 'Container'
+        style {
+            shape mobile
+            color primary
+            size small
+        }
+    }
+    element web-app {
+        title 'Веб-приложение'
+        summary 'Пользовательское веб-приложение'
+        notation 'Container'
+        style {
+            shape browser
+            color primary
+            size small
+        }
+    }
+     element other-app {
+        title 'Другие платформы'
+        summary 'Пользовательские приложение на дргуих платформах'
+        notation 'Container'
+        style {
+            shape rectangle
+            color primary
+            size small
+        }
+    }
+
+    //relationships
+     relationship https {
+        technology 'HTTPS'
+     }
+
+     relationship pgsql {
+        technology 'PostgreSQL'
+     }
+
+     relationship tcp {
+        technology 'TCP/IP'
+     }
+     relationship amqp {
+        technology 'AMQP'
+     }
+    
+}
