@@ -35,6 +35,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -96,6 +99,7 @@ jobs:
         with:
           context: ./src/monolith
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-monolith.outputs.tags }}
           labels: ${{ steps.meta-monolith.outputs.labels }}
           cache-from: type=gha
@@ -106,6 +110,7 @@ jobs:
         with:
           context: ./src/microservices/movies
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-movies.outputs.tags }}
           labels: ${{ steps.meta-movies.outputs.labels }}
           cache-from: type=gha
@@ -116,6 +121,7 @@ jobs:
         with:
           context: ./src/microservices/events
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-events.outputs.tags }}
           labels: ${{ steps.meta-events.outputs.labels }}
           cache-from: type=gha
@@ -126,6 +132,7 @@ jobs:
         with:
           context: ./src/microservices/proxy
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta-proxy.outputs.tags }}
           labels: ${{ steps.meta-proxy.outputs.labels }}
           cache-from: type=gha
