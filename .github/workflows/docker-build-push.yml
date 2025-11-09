@@ -2,7 +2,7 @@ name: Build, Test, and Push (proxy & events)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, cinema ]
     paths:
       - 'src/**'
       - 'tests/postman/**'
