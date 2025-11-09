@@ -13,10 +13,6 @@ BEGIN
 END
 $$;
 
-
--- Create the database if it doesn't exist
-CREATE DATABASE cinemaabyss;
-
 -- Grant privileges
 
 GRANT ALL PRIVILEGES ON DATABASE cinemaabyss TO postgres;
