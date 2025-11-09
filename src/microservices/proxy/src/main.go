@@ -227,6 +227,11 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"ok":true}`))
+	})
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -242,6 +247,7 @@ func main() {
 		_, _ = fmt.Fprintf(w, `{"gradualMigration":%v,"moviesMigrationPercent":%d,"targets":{"monolith":"%s","movies":"%s","events":"%s"}}`,
 			gradual, percent, monolithURL, moviesURL, eventsURL)
 	})
+	
 
 	// events direct
 	mux.HandleFunc("/api/events",      serveWithLog("events",   eventsProxy))

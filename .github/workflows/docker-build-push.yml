@@ -35,33 +35,52 @@ jobs:
 
       - name: Build & start stack (docker compose)
         run: |
-          # Важно: билдим актуальный код сервисов
           docker compose up -d --build
           docker ps -a
 
-      - name: Wait for events-service health
+      - name: Wait for monolith (8080 /health)
         shell: bash
         run: |
           set -e
-          for i in {1..60}; do
+          for i in {1..120}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/health || true)
+            if [[ "$code" == "200" ]]; then echo "monolith is up"; exit 0; fi
+            sleep 2
+          done
+          echo "monolith did not become healthy in time"; exit 1
+
+      - name: Wait for movies-service (8081 /api/movies/health)
+        shell: bash
+        run: |
+          set -e
+          for i in {1..120}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8081/api/movies/health || true)
+            if [[ "$code" == "200" ]]; then echo "movies-service is up"; exit 0; fi
+            sleep 2
+          done
+          echo "movies-service did not become healthy in time"; exit 1
+
+      - name: Wait for events-service (8082 /api/events/health)
+        shell: bash
+        run: |
+          set -e
+          for i in {1..120}; do
             code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8082/api/events/health || true)
-            if [[ "$code" == "200" ]]; then
-              echo "events-service is healthy"
-              exit 0
-            fi
+            if [[ "$code" == "200" ]]; then echo "events-service is up"; exit 0; fi
             sleep 2
           done
           echo "events-service did not become healthy in time"; exit 1
 
-      - name: Wait for proxy (optional)
+      - name: Wait for proxy (8000 /health)
         shell: bash
         run: |
-          # не фейлим джоб, просто пытаемся увидеть ответ от прокси
-          for i in {1..30}; do
-            curl -s -I http://127.0.0.1:8000/ >/dev/null && break || true
+          set -e
+          for i in {1..120}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/health || true)
+            if [[ "$code" == "200" ]]; then echo "proxy is up"; exit 0; fi
             sleep 2
           done
-        continue-on-error: true
+          echo "proxy did not become healthy in time"; exit 1
 
       - name: Run Postman tests
         uses: actions/setup-node@v4
