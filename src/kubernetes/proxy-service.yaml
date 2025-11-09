@@ -27,12 +27,21 @@ spec:
         ports:
         - containerPort: 8000
         env:
-        - name: PORT
-          value: "8000"
-        - configMapRef:
-            name: cinemaabyss-config
-        - secretRef:
-            name: cinemaabyss-secrets
+        - name: MOVIES_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cinemaabyss-config
+              key: MOVIES_SERVICE_URL
+        - name: MONOLITH_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cinemaabyss-config
+              key: MONOLITH_URL
+        - name: EVENTS_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cinemaabyss-config
+              key: EVENTS_SERVICE_URL
         resources:
           limits:
             cpu: "300m"

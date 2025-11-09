@@ -5,7 +5,7 @@ global:
 
 # Image pull secrets
 imagePullSecrets:
-  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6
+  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCIgOiAiWVhKelpXNXBhVzl6YjJ0cGJqcG5hSEJmV1RsNVJIRnllRVZXTld4QlZrdFBWWFJEZUdacE5VbFlTWFJ4TUZnNE1tdE1kVlpYIgoJCX0KCX0sCgkiY3JlZHNTdG9yZSI6ICJkZXNrdG9wIiwKCSJjdXJyZW50Q29udGV4dCI6ICJkZXNrdG9wLWxpbnV4Igp9
 # Database configuration
 database:
   host: postgres
@@ -53,7 +53,7 @@ monolith:
 proxyService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/proxy-service
+    repository: ghcr.io/bietham/architect_course_sprint_2/proxy-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -73,7 +73,7 @@ proxyService:
 moviesService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/movies-service
+    repository: ghcr.io/bietham/architect_course_sprint_2/movies-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -93,7 +93,7 @@ moviesService:
 eventsService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/events-service
+    repository: ghcr.io/bietham/architect_course_sprint_2/events-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -129,13 +129,13 @@ kafka:
     size: 5Gi
     accessMode: ReadWriteOnce
   topics:
-    - name: movie-events
+    - name: events.movie
       partitions: 1
       replicationFactor: 1
-    - name: user-events
+    - name: events.user
       partitions: 1
       replicationFactor: 1
-    - name: payment-events
+    - name: events.payment
       partitions: 1
       replicationFactor: 1
 
