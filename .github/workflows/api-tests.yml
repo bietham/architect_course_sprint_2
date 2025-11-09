@@ -2,9 +2,9 @@ name: API Tests
 
 on:
   push:
-    branches: [ main, master, cinema ]
+    branches: [ main, master,cinema ]
   pull_request:
-    branches: [ main, master, cinema ]
+    branches: [ main, master,cinema ]
   workflow_dispatch:
     inputs:
       environment:
@@ -39,10 +39,6 @@ jobs:
           # Wait for services to be ready
           echo "Waiting for services to be ready..."
           sleep 120
-      
-      - name: Apply schema (idempotent)
-        run: docker compose exec -T postgres psql -U postgres -d cinemaabyss -v ON_ERROR_STOP=1 -f /docker-entrypoint-initdb.d/init.sql
-
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
