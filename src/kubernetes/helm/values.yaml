@@ -33,7 +33,7 @@ database:
 monolith:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/monolith
+    repository: ghcr.io/bietham/architect_course_sprint_2/monolith
     tag: latest
     pullPolicy: Always
   replicas: 1

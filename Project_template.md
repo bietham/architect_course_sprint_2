@@ -370,7 +370,9 @@ minikube tunnel
 https://cinemaabyss.example.com/api/movies
 и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
 
-Скрин развертывания и вывода: ![Скрин развертывания и вывода](diagrams/pics/kuber-final.png)
+Скрин развертывания: ![Скрин развертыванияc](diagrams/pics/kuber-final.png)
+Скрин вывода: ![Скрин вывода](diagrams/pics/request-final.png)
+Скрин тестов: ![Скрин тестов](diagrams/pics/kube-tests-final.png)
 
 ## Удаляем все
 
