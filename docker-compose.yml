@@ -22,6 +22,34 @@ services:
     networks:
       - cinemaabyss-network
 
+  db-migrate:
+    image: postgres:14
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src/database/init.sql:/init/init.sql:ro
+    entrypoint: ["/bin/sh","-lc"]
+    command: >
+      'psql -h postgres -U postgres -d cinemaabyss -v ON_ERROR_STOP=1 -f /init/init.sql'
+    environment:
+      PGPASSWORD: postgres_password
+    restart: "no"
+    networks:
+      - cinemaabyss-network
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+     - "8091:80"
+    depends_on:
+      - postgres
+    networks:
+      - cinemaabyss-network
+
   # ZooKeeper for Kafka
   zookeeper:
     image: wurstmeister/zookeeper:latest
@@ -43,7 +71,7 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "movie-events:1:1,user-events:1:1,payment-events:1:1"
+      KAFKA_CREATE_TOPICS: "events.user:1:1,events.payment:1:1,events.movie:1:1"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -89,13 +117,17 @@ services:
       dockerfile: Dockerfile
     container_name: cinemaabyss-events-service
     depends_on:
-      - postgres
       - kafka
-    ports:
-      - "8082:8082"
+      - postgres
     environment:
       PORT: 8082
       KAFKA_BROKERS: kafka:9092
+      KAFKA_GROUP_ID: events-service-group
+      TOPIC_USER: events.user
+      TOPIC_PAYMENT: events.payment
+      TOPIC_MOVIE: events.movie
+    ports:
+      - "8082:8082"
     networks:
       - cinemaabyss-network
 
@@ -117,7 +149,7 @@ services:
       MOVIES_SERVICE_URL: http://movies-service:8081
       EVENTS_SERVICE_URL: http://events-service:8082
       GRADUAL_MIGRATION: "true"
-      MOVIES_MIGRATION_PERCENT: "50"
+      MOVIES_MIGRATION_PERCENT: "100"
     networks:
       - cinemaabyss-network
 

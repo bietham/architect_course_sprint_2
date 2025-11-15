@@ -1,31 +1,25 @@
-FROM golang:1.23-alpine AS builder
+# syntax=docker/dockerfile:1.6
 
-WORKDIR /app
+# --- build ---
+FROM --platform=$BUILDPLATFORM golang:1.23-alpine AS build
+WORKDIR /src
 
-# Copy go mod and sum files
-COPY go.mod ./
-
-# Download all dependencies
+# кэш модулей
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source code
+# исходники
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o movies-service .
+# кросс-сборка под целевую платформу
+ARG TARGETOS TARGETARCH
+ENV CGO_ENABLED=0
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/movies-service .
 
-# Use a smaller image for the final application
-FROM alpine:latest  
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-# Copy the binary from builder
-COPY --from=builder /app/movies-service .
-
-# Expose the application port
+# --- runtime ---
+FROM gcr.io/distroless/static:nonroot
+COPY --from=build /out/movies-service /movies-service
+USER nonroot:nonroot
 EXPOSE 8081
-
-# Command to run the executable
-CMD ["./movies-service"]
+ENTRYPOINT ["/movies-service"]

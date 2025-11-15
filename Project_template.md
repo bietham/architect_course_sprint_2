@@ -5,7 +5,11 @@
 1. Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
 Результат представьте в виде контейнерной диаграммы в нотации С4.
 Добавьте ссылку на файл в этот шаблон
-[ссылка на файл](ссылка)
+
+[Файл с диаграммой](/diagrams/puml/diagram.puml)
+
+Также можно открыть в likeC4 - файлы в /diagrams/*.c4
+
 
 # Задание 2
 
@@ -58,6 +62,18 @@
 
 Необходимые тесты для проверки этого API вызываются при запуске npm run test:local из папки tests/postman 
 Приложите скриншот тестов и скриншот состояния топиков Kafka из UI http://localhost:8090 
+
+Скриншот тестов: 
+**Тесты:**
+1. Test summary: ![Test summary](diagrams/pics/test_summary.png)
+2. Test 1: ![Диаграмма контекста - Like C4](diagrams/pics/test_list_1.png)
+3. Test 2: ![Диаграмма контекста - Like C4](diagrams/pics/test_list_2.png)
+
+**Кафка:**
+1. Kafka summary: ![Kafka summary](diagrams/pics/kafka_summary.png)
+2. Kafka topics - events.movies: ![Events.movies](diagrams/pics/events_movies.png)
+3. Kafka topics - events.payments: ![Events.payments](diagrams/pics/events_payments.png)
+4. Kafka topics - events.users: ![Events.users](diagrams/pics/events_users.png)
 
 # Задание 3
 
@@ -272,9 +288,13 @@ cat .docker/config.json | base64
   Часть тестов с health-чек упадет, но создание событий отработает.
   Откройте логи event-service и сделайте скриншот обработки событий
 
+
+
 #### Шаг 3
 Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и  скриншот вывода event-service после вызова тестов.
 
+  Ответ movies: ![Скрин боработки movies](diagrams/pics/kuber-movies.png)
+  Скрин обработки event: ![Скрин обработки event](diagrams/pics/kuber-events-logs.png)
 
 # Задание 4
 Для простоты дальнейшего обновления и развертывания вам как архитектуру необходимо так же реализовать helm-чарты для прокси-сервиса и проверить работу 
@@ -349,6 +369,10 @@ minikube tunnel
 Потом вызовите 
 https://cinemaabyss.example.com/api/movies
 и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
+
+Скрин развертывания: ![Скрин развертыванияc](diagrams/pics/kuber-final.png)
+Скрин вывода: ![Скрин вывода](diagrams/pics/request-final.png)
+Скрин тестов: ![Скрин тестов](diagrams/pics/kube-tests-final.png)
 
 ## Удаляем все
 

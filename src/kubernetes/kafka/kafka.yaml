@@ -150,7 +150,7 @@ spec:
         - name: KAFKA_ZOOKEEPER_CONNECT
           value: zookeeper:2181
         - name: KAFKA_CREATE_TOPICS
-          value: "movie-events:1:1,user-events:1:1,payment-events:1:1"
+          value: "events.user:1:1,events.payment:1:1,events.movie:1:1"
         - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
           value: "true"
         - name: KAFKA_BROKER_ID

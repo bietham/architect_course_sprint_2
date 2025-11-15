@@ -1,31 +1,26 @@
-FROM golang:1.23-alpine AS builder
+# syntax=docker/dockerfile:1.6
 
-WORKDIR /app
+# 1) builder запускаем на платформе билдера (amd64 на GitHub, arm64 у тебя на Mac)
+FROM --platform=$BUILDPLATFORM golang:1.23-alpine AS build
+WORKDIR /src
 
-# Copy go mod and sum files
-COPY go.mod ./
-
-# Download all dependencies
+# Кэш модулей
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source code
+# Исходники
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o monolith .
+# 2) ВАЖНО: кросс-компиляция под целевую платформу от buildx
+ARG TARGETOS TARGETARCH
+ENV CGO_ENABLED=0
+# Если main.go в корне — оставь ".", если в поддиректории — укажи путь (например ./cmd/monolith)
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -ldflags="-s -w" -o /out/monolith .
 
-# Use a smaller image for the final application
-FROM alpine:latest  
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-# Copy the binary from builder
-COPY --from=builder /app/monolith .
-
-# Expose the application port
+# 3) Минимальный рантайм (мультиарховый)
+FROM gcr.io/distroless/static:nonroot
+COPY --from=build /out/monolith /monolith
+USER nonroot:nonroot
 EXPOSE 8080
-
-# Command to run the executable
-CMD ["./monolith"]
+ENTRYPOINT ["/monolith"]

@@ -1,0 +1,79 @@
+@startuml
+!include <c4/C4_Container.puml>
+
+' === Пользователь ===
+Person(Customer, "Клиент", "Использует клиентские приложения")
+
+' === Клиентские приложения ===
+Container_Boundary(ClientApps, "Клиентские приложения") {
+  Container(MobileApp, "Мобильное приложение", "iOS / Android", "Пользовательское приложение на мобильных устройствах")
+  Container(WebApp, "Веб-приложение", "SPA / Web", "Пользовательский интерфейс в браузере")
+  Container(OtherApp, "Другие платформы", "TV / Smart / др.", "Приложения на других платформах")
+}
+
+' === Граница Kubernetes-кластера ===
+System_Boundary(K8s, "Kubernetes cluster") {
+  Container(ApiGateway, "API Gateway", "Go", "Фасад; валидация и маршрутизация запросов")
+  Container(ProfileService, "profile-service", "Go", "Профиль пользователя, аутентификация и авторизация")
+  Container(MovieService, "movie-service", "Go", "Каталог фильмов, рейтинги, подборки")
+  Container(PaymentService, "payment-service", "Go", "Обработка платежей")
+  Container(SubscriptionService, "subscription-service", "Go", "Управление подписками")
+  ContainerQueue(Kafka, "Kafka", "Kafka", "Внутренний брокер событий")
+  Container(DbProxy, "PostgreSQL Proxy", "HAProxy", "Маршрутизация SQL-трафика к БД")
+}
+
+' === Слой БД ===
+System_Boundary(DB, "PostgreSQL server") {
+  ContainerDb(Postgres, "База данных", "PostgreSQL", "Доменные данные: профили, фильмы, платежи, подписки")
+}
+
+' === Внешние системы ===
+System_Ext(Rabbit, "RabbitMQ", "AMQP", "Брокер событий рекомендательной системы")
+System_Ext(OnlineCinema, "Онлайн-кинотеатры", "HTTPS", "Внешние провайдеры метаданных/каталога")
+System_Ext(S3, "S3-хранилище", "S3 / HTTPS", "Хранилище файлов (видео и объекты)")
+System_Ext(Billing, "Внешний биллинг", "HTTPS", "Эквайринг/обработка платежей")
+System_Ext(Recommender, "recomendation-service", "AMQP / HTTPS", "Рекомендательная система")
+
+' === Связи: клиент → приложения ===
+Rel(Customer, MobileApp, "Использует", "")
+Rel(Customer, WebApp, "Использует", "")
+Rel(Customer, OtherApp, "Использует", "")
+
+' === Связи: приложения → API ===
+Rel(MobileApp, ApiGateway, "Вызывает API", "HTTPS")
+Rel(WebApp, ApiGateway, "Вызывает API", "HTTPS")
+Rel(OtherApp, ApiGateway, "Вызывает API", "HTTPS")
+
+' === Связи: gateway → сервисы ===
+Rel(ApiGateway, ProfileService, "Маршрутизация запросов: профиль/аутентификация", "HTTPS")
+Rel(ApiGateway, MovieService, "Маршрутизация запросов: фильмы/рейтинги", "HTTPS")
+Rel(ApiGateway, SubscriptionService, "Маршрутизация запросов: подписки", "HTTPS")
+Rel(ApiGateway, PaymentService, "Маршрутизация запросов: оплаты", "HTTPS")
+
+' === События и данные ===
+Rel(ProfileService, Kafka, "Публикация событий пользователя (регистрация, вход)", "Kafka")
+Rel(Kafka, ProfileService, "Чтение событий фильмов для рекомендаций", "Kafka")
+
+Rel(MovieService, Kafka, "Публикация событий фильмов (просмотр, оценка, добавление)", "Kafka")
+Rel(MovieService, DbProxy, "Метаданные фильмов, рейтинги, жанры", "SQL")
+
+Rel(SubscriptionService, DbProxy, "Подписки, скидки", "SQL")
+Rel(Kafka, SubscriptionService, "Чтение событий оплаты", "Kafka")
+
+Rel(PaymentService, Kafka, "События платежей (успех/ошибка)", "Kafka")
+Rel(PaymentService, DbProxy, "Данные платежей", "SQL")
+
+Rel(ProfileService, Rabbit, "Передаёт события пользователя", "AMQP")
+
+Rel(MovieService, OnlineCinema, "Запрос метаданных/доступов", "HTTPS")
+Rel(MovieService, S3, "Чтение медиаконтента", "HTTPS")
+
+Rel(PaymentService, Billing, "Обработка платежей", "HTTPS")
+
+Rel(Rabbit, ProfileService, "Сохраняет обновлённые подборки", "AMQP")
+Rel(Rabbit, Recommender, "Транзит событий пользователя", "AMQP")
+Rel(Recommender, Rabbit, "Публикует обновления подборок", "AMQP")
+
+Rel(DbProxy, Postgres, "Маршрутизация SQL к БД", "PostgreSQL")
+
+@enduml
